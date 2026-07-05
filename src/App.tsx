@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import './App.css'
-import logoUrl from './assets/logo.png?v=3'
-import handshakeIcon from './assets/handshake.png?v=3'
-import targetIcon from './assets/target.png?v=3'
-import s1Icon from './assets/s1.png?v=3'
-import s2Icon from './assets/s2.png?v=3'
-import s3Icon from './assets/s3.png?v=3'
-import s4Icon from './assets/s4.png?v=3'
-import s5Icon from './assets/s5.png?v=3'
+import logoUrl from './assets/logo.png'
+import handshakeIcon from './assets/handshake.png'
+import targetIcon from './assets/target.png'
+import s1Icon from './assets/s1.png'
+import s2Icon from './assets/s2.png'
+import s3Icon from './assets/s3.png'
+import s4Icon from './assets/s4.png'
+import s5Icon from './assets/s5.png'
 
 function App() {
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
@@ -541,7 +541,7 @@ function App() {
           <div className="ind-card">
             <div className="ind-image-container">
               {/* Using a placeholder for the uploaded image. Please place your image in the public folder and update the src */}
-              <img src="/retail-icon.png?v=3" alt="Retail & D2C" className="ind-image" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.nextElementSibling.style.display='flex'; }} />
+              <img src="/retail-icon.png?v=3" alt="Retail & D2C" className="ind-image" onError={(e) => { e.currentTarget.style.display='none'; if(e.currentTarget.nextElementSibling) { (e.currentTarget.nextElementSibling as HTMLElement).style.display='flex'; } }} />
               <div className="ind-fallback" style={{display: 'none'}}>🛍️📦</div>
             </div>
             <div className="ind-content">
@@ -558,7 +558,7 @@ function App() {
           {/* Card 2 */}
           <div className="ind-card">
             <div className="ind-image-container">
-              <img src="/edtech-icon.png?v=3" alt="EdTech" className="ind-image" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.nextElementSibling.style.display='flex'; }} />
+              <img src="/edtech-icon.png?v=3" alt="EdTech" className="ind-image" onError={(e) => { e.currentTarget.style.display='none'; if(e.currentTarget.nextElementSibling) { (e.currentTarget.nextElementSibling as HTMLElement).style.display='flex'; } }} />
               <div className="ind-fallback" style={{display: 'none'}}>🎓📚</div>
             </div>
             <div className="ind-content">
@@ -575,7 +575,7 @@ function App() {
           {/* Card 3 */}
           <div className="ind-card">
             <div className="ind-image-container">
-              <img src="/healthcare-icon.png?v=3" alt="Healthcare" className="ind-image" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.nextElementSibling.style.display='flex'; }} />
+              <img src="/healthcare-icon.png?v=3" alt="Healthcare" className="ind-image" onError={(e) => { e.currentTarget.style.display='none'; if(e.currentTarget.nextElementSibling) { (e.currentTarget.nextElementSibling as HTMLElement).style.display='flex'; } }} />
               <div className="ind-fallback" style={{display: 'none'}}>🏥🛡️</div>
             </div>
             <div className="ind-content">
@@ -592,7 +592,7 @@ function App() {
           {/* Card 4 */}
           <div className="ind-card">
             <div className="ind-image-container">
-              <img src="/b2b-icon.png?v=3" alt="B2B SaaS" className="ind-image" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.nextElementSibling.style.display='flex'; }} />
+              <img src="/b2b-icon.png?v=3" alt="B2B SaaS" className="ind-image" onError={(e) => { e.currentTarget.style.display='none'; if(e.currentTarget.nextElementSibling) { (e.currentTarget.nextElementSibling as HTMLElement).style.display='flex'; } }} />
               <div className="ind-fallback" style={{display: 'none'}}>🏢📊</div>
             </div>
             <div className="ind-content">
