@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import './App.css'
-import logoUrl from './assets/logo.png?v=3'
-import handshakeIcon from './assets/handshake.png?v=3'
-import targetIcon from './assets/target.png?v=3'
-import s1Icon from './assets/s1.png?v=3'
-import s2Icon from './assets/s2.png?v=3'
-import s3Icon from './assets/s3.png?v=3'
-import s4Icon from './assets/s4.png?v=3'
-import s5Icon from './assets/s5.png?v=3'
+import logoUrl from './assets/logo.png'
+import handshakeIcon from './assets/handshake.png'
+import targetIcon from './assets/target.png'
+import s1Icon from './assets/s1.png'
+import s2Icon from './assets/s2.png'
+import s3Icon from './assets/s3.png'
+import s4Icon from './assets/s4.png'
+import s5Icon from './assets/s5.png'
 
 function App() {
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
