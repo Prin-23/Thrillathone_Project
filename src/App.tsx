@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import logoUrl from './assets/logo.png'
 import handshakeIcon from './assets/handshake.png'
@@ -11,41 +11,121 @@ import s5Icon from './assets/s5.png'
 
 function App() {
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
+  const [activeNav, setActiveNav] = useState<string>('home');
+  const [activeSlide, setActiveSlide] = useState<string>('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isMobileProductsDropdownOpen, setIsMobileProductsDropdownOpen] = useState<boolean>(false);
+  const isScrollingToRef = useRef<boolean>(false);
+
+  const handleNavClick = (navTarget: string) => {
+    setActiveNav(navTarget);
+    isScrollingToRef.current = true;
+    // Allow smooth scroll to finish before IntersectionObserver takes over again
+    setTimeout(() => {
+      isScrollingToRef.current = false;
+    }, 1000);
+
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+      setIsMobileProductsDropdownOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !isScrollingToRef.current) {
+          const navTarget = entry.target.getAttribute('data-nav');
+          if (navTarget) {
+            setActiveNav(navTarget);
+          }
+          const slideTarget = entry.target.getAttribute('data-slide');
+          setActiveSlide(slideTarget || '');
+        }
+      });
+    }, {
+      threshold: 0.5
+    });
+
+    const slides = document.querySelectorAll('.snap-slide');
+    slides.forEach(slide => observer.observe(slide));
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      // Only close if scrolled more than 15px to avoid tiny accidental scrolls
+      if (Math.abs(window.scrollY - lastScrollY) > 15) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    // Only attach listener when menu is open to optimize performance
+    if (isMobileMenuOpen) {
+      // Add a small delay so the opening click doesn't accidentally trigger it
+      const timer = setTimeout(() => {
+        lastScrollY = window.scrollY;
+        window.addEventListener('scroll', handleScroll, { passive: true });
+      }, 150);
+
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('scroll', handleScroll);
+      };
+    }
+  }, [isMobileMenuOpen]);
 
   const faqs = [
     {
       question: "How is Thillathon different from a typical software agency?",
       answer: "We act as your startup technology partner — strategy, product, engineering, integrations, AI, and launch all under one roof, with revenue as the goal, not deliverables.",
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" /><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" /><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" /><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" /></svg>
       )
     },
     {
       question: "How quickly can I launch my product?",
       answer: "Most MVPs go live in 4-8 weeks. We follow a focused roadmap so you start selling early, then iterate based on real user feedback.",
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
       )
     },
     {
       question: "What if I don't have a complete idea yet?",
       answer: "Perfect time to talk to us. Our discovery sprint turns a rough idea into a validated product, tech, and launch blueprint.",
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" /><path d="m12 15-3-3a22 22 0 0 1 3.82-13.3c3.48-3.48 8.68-3.48 8.68-3.48s0 5.2-3.48 8.68A22 22 0 0 1 12 15z" /><path d="M9 18h2.09a2.2 2.2 0 0 0 2.12-1.63L14.5 12" /><path d="M2.5 14H6" /><path d="M10 2.5V6" /></svg>
       )
     },
     {
-      question: "Do you only build Android apps?",
-      answer: "Android is a core strength, but we also ship web apps, admin dashboards, integrations, and AI-powered backends — whatever your business actually needs.",
+      question: "Can you guarantee product-market fit?",
+      answer: "No agency can guarantee PMF, but we use rapid prototyping and real market validation loops to significantly increase your chances of finding traction early.",
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
       )
     },
     {
-      question: "Do you support founders after launch?",
+      question: "How do you price your services?",
+      answer: "We offer flexible pricing options: fixed-bid for clearly scoped MVPs, or monthly retainer models for ongoing product development and scaling.",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+      )
+    },
+    {
+      question: "How long does it typically take to launch an MVP?",
+      answer: "Depending on complexity, most of our startup MVPs are designed, engineered, and launched within 8 to 12 weeks.",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+      )
+    },
+    {
+      question: "Do you offer post-launch support and scaling?",
       answer: "Yes — we stay on as your long-term technology partner: feature releases, performance, infra, analytics, and growth experiments.",
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
       )
     }
   ];
@@ -53,36 +133,79 @@ function App() {
   return (
     <div className="app-container">
       <div className="bg-glow"></div>
-      
+
       <header className="header-container">
         <nav className="nav-bar">
           <div className="logo-container">
             <img src={logoUrl} alt="Thrillathon Logo" className="navbar-logo-img" />
           </div>
-          
-          <div className="nav-links">
-            <a className="nav-link active">Home</a>
-            <a className="nav-link">Features</a>
-            <a className="nav-link">Services</a>
-            <a className="nav-link">Our Products</a>
-            <a className="nav-link">About</a>
-            <a className="nav-link">Contact Us</a>
-            <a className="nav-link">Privacy Policy</a>
+
+          <button className="mobile-menu-btn" aria-label="Toggle menu" onClick={() => { setIsMobileMenuOpen(!isMobileMenuOpen); setIsMobileProductsDropdownOpen(false); }}>
+            {isMobileMenuOpen ? (
+              <svg viewBox="0 0 24 24" width="28" height="28" stroke="#333" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" width="28" height="28" stroke="#333" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            )}
+          </button>
+
+          <div className={`nav-links ${isMobileMenuOpen ? 'nav-links-open' : ''}`}>
+            <a href="#home" onClick={() => handleNavClick('home')} className={`nav-link ${activeNav === 'home' ? 'active' : ''}`}>Home</a>
+            <a href="#about" onClick={() => handleNavClick('about')} className={`nav-link ${activeNav === 'about' ? 'active' : ''}`}>About</a>
+            <a href="#services" onClick={() => handleNavClick('services')} className={`nav-link ${activeNav === 'services' ? 'active' : ''}`}>Services</a>
+            
+            <div className={`nav-products-wrapper ${activeNav === 'cuboid' ? 'active' : ''}`}>
+              <div className="nav-cuboid-container" onClick={() => handleNavClick('cuboid')}>
+                <div className={`nav-slider ${activeSlide === '7' ? 'paused-whooppe' : activeSlide === '8' ? 'paused-harika' : activeSlide === '9' ? 'paused-products' : ''}`}>
+                  <a href="#products" className="nav-slide-item nav-slide-item-1" style={{ textDecoration: 'none' }}>
+                    OUR PRODUCTS
+                  </a>
+                  <a href="#products" className="nav-slide-item nav-slide-item-2" style={{ textDecoration: 'none' }}>
+                    WHOOPPE
+                  </a>
+                  <a href="#harika" className="nav-slide-item nav-slide-item-3" style={{ textDecoration: 'none' }}>
+                    HARIKA AI
+                  </a>
+                </div>
+              </div>
+              <button 
+                className="nav-mobile-dropdown-btn" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMobileProductsDropdownOpen(!isMobileProductsDropdownOpen);
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isMobileProductsDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div className={`nav-products-dropdown ${isMobileProductsDropdownOpen ? 'mobile-open' : ''}`}>
+                <a href="#harika" onClick={(e) => { e.stopPropagation(); handleNavClick('cuboid'); setIsMobileProductsDropdownOpen(false); }} className="dropdown-item harika-text">HARIKA AI</a>
+                <a href="#products" onClick={(e) => { e.stopPropagation(); handleNavClick('cuboid'); setIsMobileProductsDropdownOpen(false); }} className="dropdown-item whooppe-text">WHOOPPE</a>
+              </div>
+            </div>
+            <a href="#features" onClick={() => handleNavClick('features')} className={`nav-link ${activeNav === 'features' ? 'active' : ''}`}>Features</a>
+            <a href="#contact" onClick={() => handleNavClick('contact')} className={`nav-link ${activeNav === 'contact' ? 'active' : ''}`}>Contact US</a>
+            <a href="#privacy" onClick={() => handleNavClick('privacy')} className={`nav-link ${activeNav === 'privacy' ? 'active' : ''}`}>Privacy Policy</a>
           </div>
         </nav>
       </header>
 
-      <main className="hero-section snap-slide">
+      <main id="home" className="hero-section snap-slide" data-nav="home">
         <div className="hero-content">
           <h1 className="hero-title">
-            Build Your <span className="gradient-text">Startup.</span><br />
-            We Build <span className="gradient-text">Everything.</span>
+            Build Your <span className="gradient-text-pink">Startup.</span><br />
+            We Build <span className="gradient-text-blue">Everything.</span>
           </h1>
-          
+
           <p className="hero-subtitle">
             From Idea Validation to Market Launch — We Build Complete Startup Ecosystems That Help Founders Start Selling From Day One.
           </p>
-          
+
           <div className="hero-actions">
             <button className="btn btn-primary">
               Start Your Project &rarr;
@@ -96,176 +219,179 @@ function App() {
         <div className="hero-illustration">
           <div className="floating-scene">
             <div className="iso-wrapper">
-              
+
               {/* Center Phone */}
               <div className="iso-phone float-main">
-                <div className="iso-phone-screen">
-                  <div className="iso-top-icons">
-                    <div className="iso-icon-left"></div>
-                    <div className="iso-icon-right"></div>
+                <div className="iso-phone-screen center-screen">
+                  <div className="center-header">
+                    <div className="ch-left"></div>
+                    <div className="ch-right"></div>
                   </div>
-                  <div className="iso-phone-title">482/24 3563B</div>
-                  <div className="iso-phone-subtitle">Startup Ecosystem</div>
-                  
-                  <div className="iso-phone-stats">
-                    <div className="iso-stat-box">
-                      <div className="iso-stat-icon bg-blue"></div>
-                      <div className="iso-stat-lines">
-                        <div className="iso-line-w"></div>
-                        <div className="iso-line-w short"></div>
-                      </div>
-                    </div>
-                    <div className="iso-stat-box">
-                      <div className="iso-stat-icon bg-purple"></div>
-                      <div className="iso-stat-lines">
-                        <div className="iso-line-w"></div>
-                        <div className="iso-line-w short"></div>
-                      </div>
-                    </div>
-                    <div className="iso-stat-box">
-                      <div className="iso-stat-icon bg-cyan"></div>
-                      <div className="iso-stat-lines">
-                        <div className="iso-line-w"></div>
-                        <div className="iso-line-w short"></div>
-                      </div>
-                    </div>
-                    <div className="iso-stat-box">
-                      <div className="iso-stat-icon bg-pink"></div>
-                      <div className="iso-stat-lines">
-                        <div className="iso-line-w"></div>
-                        <div className="iso-line-w short"></div>
-                      </div>
+                  <div className="center-balance">
+                    <div className="cb-number">96,258.96</div>
+                    <div className="cb-label">
+                      <div className="cb-line"></div>
+                      <div className="cb-line short"></div>
                     </div>
                   </div>
-                  
-                  <div className="iso-phone-buttons">
-                    <div className="iso-pbtn solid"></div>
-                    <div className="iso-pbtn ghost"></div>
+
+                  <div className="center-list">
+                    {[1, 2, 3, 4].map(i => (
+                      <div className="c-list-item" key={i}>
+                        <div className="c-li-icon"></div>
+                        <div className="c-li-lines">
+                          <div className="c-line"></div>
+                          <div className="c-line short"></div>
+                        </div>
+                        <div className="c-li-toggle"></div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="center-buttons">
+                    <div className="c-btn"></div>
+                    <div className="c-btn"></div>
+                  </div>
+
+                  <div className="center-nav">
+                    <div className="c-nav-icon active"></div>
+                    <div className="c-nav-icon"></div>
+                    <div className="c-nav-icon"></div>
                   </div>
                 </div>
               </div>
 
-              {/* Top Left Card */}
-              <div className="iso-card card-tl float-slow">
-                <div className="iso-card-row">
-                  <div className="iso-c-icon"></div>
-                  <div className="iso-c-lines"><div className="iso-line"></div></div>
-                  <div className="iso-c-pill"></div>
-                </div>
-                <div className="iso-card-row">
-                  <div className="iso-c-icon"></div>
-                  <div className="iso-c-lines"><div className="iso-line"></div></div>
-                  <div className="iso-c-pill"></div>
-                </div>
-              </div>
-
-              {/* Top Right Card (Stripe) */}
-              <div className="iso-card card-tr float-med">
-                <div className="iso-stripe-header">
-                  <div className="iso-stripe-logo">stripe</div>
-                  <div className="iso-line"></div>
-                </div>
-                <div className="iso-network">
-                  <svg viewBox="0 0 100 60" width="100%" height="60px">
-                    <path d="M10,30 L30,10 L50,40 L70,20 L90,30 M30,10 L70,20 M50,40 L90,30" stroke="#c084fc" strokeWidth="1" fill="none" opacity="0.5"/>
-                    <circle cx="10" cy="30" r="3" fill="#8b5cf6"/>
-                    <circle cx="30" cy="10" r="3" fill="#8b5cf6"/>
-                    <circle cx="50" cy="40" r="3" fill="#8b5cf6"/>
-                    <circle cx="70" cy="20" r="3" fill="#8b5cf6"/>
-                    <circle cx="90" cy="30" r="3" fill="#8b5cf6"/>
-                  </svg>
-                </div>
-                <div className="iso-chart-title">Long run rate</div>
-                <div className="iso-bar-chart">
-                  <div className="iso-bar" style={{height: '30%'}}></div>
-                  <div className="iso-bar" style={{height: '50%'}}></div>
-                  <div className="iso-bar" style={{height: '80%'}}></div>
-                  <div className="iso-bar" style={{height: '40%'}}></div>
-                  <div className="iso-bar" style={{height: '90%'}}></div>
-                  <div className="iso-bar" style={{height: '60%'}}></div>
-                  <div className="iso-bar" style={{height: '75%'}}></div>
+              {/* Top Left Phone */}
+              <div className="iso-phone-small card-tl float-slow">
+                <div className="iso-phone-screen glass-screen">
+                  <div className="tl-header">
+                    <div className="tl-title-line"></div>
+                    <div className="tl-title-line short"></div>
+                  </div>
+                  <div className="tl-grid">
+                    {[...Array(12)].map((_, i) => (
+                      <div className="tl-icon" key={i}>
+                        <div className="tl-icon-inner"></div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Bottom Left Card */}
-              <div className="iso-card card-bl float-fast">
-                <div className="iso-area-chart">
-                  <svg viewBox="0 0 100 50" preserveAspectRatio="none">
-                    <path d="M0,50 L0,30 C20,10 40,40 60,20 C80,0 100,20 100,50 Z" fill="url(#bl-gradient)" opacity="0.8"/>
-                    <defs>
-                      <linearGradient id="bl-gradient" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stopColor="#4facfe"/>
-                        <stop offset="100%" stopColor="rgba(79, 172, 254, 0.1)"/>
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
-                <div className="iso-card-title">Analytics</div>
-                <div className="iso-stair-chart">
-                  <div className="iso-stair" style={{height: '20%'}}></div>
-                  <div className="iso-stair" style={{height: '40%'}}></div>
-                  <div className="iso-stair" style={{height: '60%'}}></div>
-                  <div className="iso-stair" style={{height: '80%'}}></div>
-                  <div className="iso-stair" style={{height: '100%'}}></div>
-                </div>
-              </div>
-
-              {/* Bottom Right Card */}
-              <div className="iso-card card-br float-med">
-                <div className="iso-card-row">
-                  <div className="iso-c-icon round bg-purple"></div>
-                  <div className="iso-c-lines"><div className="iso-line"></div></div>
-                  <div className="iso-c-val">12%</div>
-                </div>
-                <div className="iso-card-row">
-                  <div className="iso-c-icon round bg-blue"></div>
-                  <div className="iso-c-lines"><div className="iso-line"></div></div>
-                  <div className="iso-c-val">8%</div>
+              {/* Top Right Phone */}
+              <div className="iso-phone-small card-tr float-med">
+                <div className="iso-phone-screen glass-screen">
+                  <div className="tr-header">
+                    <div className="tr-logo"></div>
+                    <div className="tr-title-line"></div>
+                  </div>
+                  <div className="tr-network">
+                    <svg viewBox="0 0 100 60" width="100%" height="60px">
+                      <path d="M10,40 L30,20 L50,50 L70,30 L90,40 M30,20 L70,30 M50,50 L90,40" stroke="#8b5cf6" strokeWidth="1.5" fill="none" opacity="0.6" />
+                      <circle cx="10" cy="40" r="3" fill="#6366f1" />
+                      <circle cx="30" cy="20" r="3" fill="#6366f1" />
+                      <circle cx="50" cy="50" r="3" fill="#6366f1" />
+                      <circle cx="70" cy="30" r="3" fill="#6366f1" />
+                      <circle cx="90" cy="40" r="3" fill="#6366f1" />
+                    </svg>
+                  </div>
+                  <div className="tr-content-row">
+                    <div className="tr-lines">
+                      <div className="tr-line"></div>
+                      <div className="tr-line"></div>
+                      <div className="tr-line"></div>
+                    </div>
+                    <div className="tr-bar-chart">
+                      {[40, 70, 50, 90, 60, 80].map((h, i) => (
+                        <div className="tr-bar" style={{ height: `${h}%` }} key={i}></div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Bottom Center Card */}
-              <div className="iso-card card-bc float-slow">
-                <div className="iso-c-lines mb-2"><div className="iso-line"></div></div>
-                <div className="iso-c-lines mb-2"><div className="iso-line w-half"></div></div>
-                <div className="iso-c-lines"><div className="iso-line"></div></div>
+              {/* Bottom Left Phone */}
+              <div className="iso-phone-small card-bl float-fast">
+                <div className="iso-phone-screen glass-screen">
+                  <div className="bl-header">
+                    <div className="bl-title"></div>
+                  </div>
+                  <div className="bl-area-chart">
+                    <svg viewBox="0 0 100 50" preserveAspectRatio="none">
+                      <path d="M0,50 L0,20 C20,40 40,0 60,30 C80,10 100,20 100,50 Z" fill="url(#bl-grad)" opacity="0.9" />
+                      <defs>
+                        <linearGradient id="bl-grad" x1="0" x2="0" y1="0" y2="1">
+                          <stop offset="0%" stopColor="#8b5cf6" />
+                          <stop offset="100%" stopColor="rgba(139, 92, 246, 0.1)" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </div>
+                  <div className="bl-list">
+                    <div className="bl-line long"></div>
+                    <div className="bl-line med"></div>
+                  </div>
+                  <div className="bl-stair-chart">
+                    {[20, 40, 60, 80].map((h, i) => (
+                      <div className="bl-stair" style={{ height: `${h}%` }} key={i}>
+                        <div className="bl-stair-cap"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              {/* Floating Nodes (Left) */}
-              <div className="iso-nodes nodes-l float-fast">
-                <div className="iso-node central bg-purple">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              {/* Bottom Right Phone */}
+              <div className="iso-phone-small card-br float-med">
+                <div className="iso-phone-screen glass-screen">
+                  <div className="br-header">
+                    <div className="br-title"></div>
+                    <div className="br-action"></div>
+                  </div>
+                  <div className="br-list">
+                    {[1, 2, 3, 4].map(i => (
+                      <div className="br-list-item" key={i}>
+                        <div className="br-avatar"></div>
+                        <div className="br-lines">
+                          <div className="br-line"></div>
+                          <div className="br-line short"></div>
+                        </div>
+                        <div className="br-value"></div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="iso-node small n1 bg-blue"></div>
-                <div className="iso-node small n2 bg-cyan"></div>
-                <svg className="node-links" viewBox="0 0 100 100">
-                  <line x1="50" y1="50" x2="20" y2="20" stroke="#cbd5e1" strokeWidth="1"/>
-                  <line x1="50" y1="50" x2="80" y2="80" stroke="#cbd5e1" strokeWidth="1"/>
-                </svg>
               </div>
 
-              {/* Floating Nodes (Right) */}
-              <div className="iso-nodes nodes-r float-slow">
-                <div className="iso-node central bg-cyan">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+              {/* Far Bottom Right Mini Phone */}
+              <div className="iso-phone-mini card-fbr float-slow">
+                <div className="iso-phone-screen glass-screen">
+                  <div className="fbr-header">
+                    <div className="fbr-icon"></div>
+                    <div className="fbr-icon"></div>
+                  </div>
+                  <div className="fbr-lines">
+                    <div className="fbr-line"></div>
+                    <div className="fbr-line short"></div>
+                    <div className="fbr-line"></div>
+                  </div>
                 </div>
-                <div className="iso-node small n1 bg-purple"></div>
-                <svg className="node-links" viewBox="0 0 100 100">
-                  <line x1="50" y1="50" x2="80" y2="20" stroke="#cbd5e1" strokeWidth="1"/>
-                </svg>
               </div>
 
-              {/* Floating Nodes (Top) */}
-              <div className="iso-nodes nodes-t float-med">
-                <div className="iso-node central bg-blue">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
-                </div>
-                <div className="iso-node small n1 bg-pink"></div>
-                <div className="iso-node small n2 bg-cyan"></div>
-                <svg className="node-links" viewBox="0 0 100 100">
-                  <line x1="50" y1="50" x2="20" y2="80" stroke="#cbd5e1" strokeWidth="1"/>
-                  <line x1="50" y1="50" x2="80" y2="80" stroke="#cbd5e1" strokeWidth="1"/>
-                </svg>
+              {/* Floating Coins/Tokens */}
+              <div className="iso-coins coins-1 float-fast">
+                <div className="iso-coin blue-glow"><div className="iso-coin-inner"></div></div>
+                <div className="iso-coin purple-glow small c-offset-1"><div className="iso-coin-inner"></div></div>
+                <div className="iso-coin blue-glow small c-offset-2"><div className="iso-coin-inner"></div></div>
+              </div>
+
+              <div className="iso-coins coins-2 float-slow">
+                <div className="iso-coin purple-glow"><div className="iso-coin-inner"></div></div>
+                <div className="iso-coin blue-glow small c-offset-1"><div className="iso-coin-inner"></div></div>
+              </div>
+
+              <div className="iso-coins coins-3 float-med">
+                <div className="iso-coin blue-glow"><div className="iso-coin-inner"></div></div>
               </div>
 
             </div>
@@ -274,7 +400,7 @@ function App() {
       </main>
 
       {/* Features Section */}
-      <section className="features-section snap-slide snap-slide-flex">
+      <section id="about" className="features-section snap-slide snap-slide-flex" data-nav="about">
         <div className="features-header">
           <div className="kicker-container">
             <h3 className="features-kicker">WHY THRILLATHON</h3>
@@ -298,7 +424,7 @@ function App() {
                 <p>Launch and iterate quickly with proven frameworks and reusable components.</p>
               </div>
             </div>
-            
+
             <div className="feature-item">
               <div className="feature-icon blue">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="6" height="6" rx="1"></rect><rect x="15" y="3" width="6" height="6" rx="1"></rect><rect x="9" y="15" width="6" height="6" rx="1"></rect><path d="M6 9v2a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9"></path><path d="M12 13v2"></path></svg>
@@ -325,7 +451,7 @@ function App() {
               <div className="ring-outer spin-slow"></div>
               <div className="ring-middle spin-medium-reverse"></div>
               <div className="ring-inner spin-fast"></div>
-              
+
               <div className="circle-logo">
                 <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M 22 30 L 82 30 L 76 42 L 16 42 Z" fill="url(#t-gradient)" />
@@ -334,8 +460,8 @@ function App() {
                   <path d="M 28 66 L 33 66 L 23 80 L 18 80 Z" fill="url(#t-gradient)" />
                   <defs>
                     <linearGradient id="t-gradient" x1="16" y1="30" x2="82" y2="80" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#6366f1"/>
-                      <stop offset="1" stopColor="#8b5cf6"/>
+                      <stop stopColor="#6366f1" />
+                      <stop offset="1" stopColor="#8b5cf6" />
                     </linearGradient>
                   </defs>
                 </svg>
@@ -385,7 +511,7 @@ function App() {
                 <p>Modern, scalable tech stack that evolves with your idea, not against it.</p>
               </div>
             </div>
-            
+
             <div className="feature-item">
               <div className="feature-icon blue">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 12 12 17 22 12"></polyline><polyline points="2 17 12 22 22 17"></polyline></svg>
@@ -410,11 +536,11 @@ function App() {
       </section>
 
       {/* Services Section */}
-      <section className="services-section snap-slide snap-slide-flex">
+      <section id="services" className="services-section snap-slide snap-slide-flex" data-nav="services">
         <div className="services-header">
-          <h2 className="services-title">Everything Needed<br/>To Launch A Startup</h2>
+          <h2 className="services-title">Everything Needed<br />To Launch A Startup</h2>
           <p className="services-subtitle">
-            We handle the technology, integrations, and execution so you can<br/>
+            We handle the technology, integrations, and execution so you can<br />
             focus on growth and customers.
           </p>
         </div>
@@ -492,7 +618,7 @@ function App() {
           <div className="service-card">
             <div className="service-illustration">
               <div className="service-badge">
-                <img src={s5Icon} alt="Icon" width={52} height={52} style={{ position: 'absolute', top: '80%', left: '36%', transform: 'translate(-50%, -50%)', objectFit: 'contain' }} />
+                <img className="ai-and-automation" src={s5Icon} alt="Icon" width={52} height={52} style={{ position: 'absolute', top: '80%', left: '36%', transform: 'translate(-50%, -50%)', objectFit: 'contain' }} />
               </div>
               <img src="/service-5.png?v=3" alt="AI & Automation" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '1rem' }} />
             </div>
@@ -525,7 +651,7 @@ function App() {
       </section>
 
       {/* Industries Section */}
-      <section className="industries-section snap-slide snap-slide-flex">
+      <section className="industries-section snap-slide snap-slide-flex" data-nav="services">
         <div className="ind-header">
           <h4 className="ind-kicker">INDUSTRIES</h4>
           <h2 className="ind-title">
@@ -541,8 +667,8 @@ function App() {
           <div className="ind-card">
             <div className="ind-image-container">
               {/* Using a placeholder for the uploaded image. Please place your image in the public folder and update the src */}
-              <img src="/retail-icon.png?v=3" alt="Retail & D2C" className="ind-image" onError={(e) => { e.currentTarget.style.display='none'; if(e.currentTarget.nextElementSibling) { (e.currentTarget.nextElementSibling as HTMLElement).style.display='flex'; } }} />
-              <div className="ind-fallback" style={{display: 'none'}}>🛍️📦</div>
+              <img src="/retail-icon.png?v=3" alt="Retail & D2C" className="ind-image" onError={(e) => { e.currentTarget.style.display = 'none'; if (e.currentTarget.nextElementSibling) { (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex'; } }} />
+              <div className="ind-fallback" style={{ display: 'none' }}>🛍️📦</div>
             </div>
             <div className="ind-content">
               <h3>Retail & D2C</h3>
@@ -558,8 +684,8 @@ function App() {
           {/* Card 2 */}
           <div className="ind-card">
             <div className="ind-image-container">
-              <img src="/edtech-icon.png?v=3" alt="EdTech" className="ind-image" onError={(e) => { e.currentTarget.style.display='none'; if(e.currentTarget.nextElementSibling) { (e.currentTarget.nextElementSibling as HTMLElement).style.display='flex'; } }} />
-              <div className="ind-fallback" style={{display: 'none'}}>🎓📚</div>
+              <img src="/edtech-icon.png?v=3" alt="EdTech" className="ind-image" onError={(e) => { e.currentTarget.style.display = 'none'; if (e.currentTarget.nextElementSibling) { (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex'; } }} />
+              <div className="ind-fallback" style={{ display: 'none' }}>🎓📚</div>
             </div>
             <div className="ind-content">
               <h3>EdTech</h3>
@@ -575,8 +701,8 @@ function App() {
           {/* Card 3 */}
           <div className="ind-card">
             <div className="ind-image-container">
-              <img src="/healthcare-icon.png?v=3" alt="Healthcare" className="ind-image" onError={(e) => { e.currentTarget.style.display='none'; if(e.currentTarget.nextElementSibling) { (e.currentTarget.nextElementSibling as HTMLElement).style.display='flex'; } }} />
-              <div className="ind-fallback" style={{display: 'none'}}>🏥🛡️</div>
+              <img src="/healthcare-icon.png?v=3" alt="Healthcare" className="ind-image" onError={(e) => { e.currentTarget.style.display = 'none'; if (e.currentTarget.nextElementSibling) { (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex'; } }} />
+              <div className="ind-fallback" style={{ display: 'none' }}>🏥🛡️</div>
             </div>
             <div className="ind-content">
               <h3>Healthcare</h3>
@@ -592,8 +718,8 @@ function App() {
           {/* Card 4 */}
           <div className="ind-card">
             <div className="ind-image-container">
-              <img src="/b2b-icon.png?v=3" alt="B2B SaaS" className="ind-image" onError={(e) => { e.currentTarget.style.display='none'; if(e.currentTarget.nextElementSibling) { (e.currentTarget.nextElementSibling as HTMLElement).style.display='flex'; } }} />
-              <div className="ind-fallback" style={{display: 'none'}}>🏢📊</div>
+              <img src="/b2b-icon.png?v=3" alt="B2B SaaS" className="ind-image" onError={(e) => { e.currentTarget.style.display = 'none'; if (e.currentTarget.nextElementSibling) { (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex'; } }} />
+              <div className="ind-fallback" style={{ display: 'none' }}>🏢📊</div>
             </div>
             <div className="ind-content">
               <h3>B2B SaaS</h3>
@@ -610,7 +736,7 @@ function App() {
       </section>
 
       {/* Ecosystem Section */}
-      <section className="ecosystem-section snap-slide snap-slide-flex">
+      <section className="ecosystem-section snap-slide snap-slide-flex" data-nav="services">
         <div className="ecosystem-header">
           <h4 className="ecosystem-kicker">Startup Ecosystem</h4>
           <h2 className="ecosystem-title">
@@ -700,9 +826,9 @@ function App() {
       </section>
 
       {/* Process Section */}
-      <section className="process-section snap-slide snap-slide-flex">
+      <section className="process-section snap-slide snap-slide-flex" data-nav="services">
         <div className="process-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
-          
+
           {/* Top Flow Diagram */}
           <div className="process-flow-diagram">
             <div className="process-flow-step">
@@ -712,7 +838,7 @@ function App() {
               </div>
             </div>
             <div className="process-flow-arrow">
-              <svg className="process-arrow-svg" style={{ animationDelay: '0s' }} width="80" height="24" viewBox="0 0 80 24" fill="none" stroke="#a5b4fc" strokeWidth="2" strokeDasharray="6 6" strokeLinecap="round" strokeLinejoin="round"><path d="M0 12h78M70 4l8 8-8 8"/></svg>
+              <svg className="process-arrow-svg" style={{ animationDelay: '0s' }} width="80" height="24" viewBox="0 0 80 24" fill="none" stroke="#a5b4fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M0 12h78" strokeDasharray="6 6" className="process-arrow-line" /><path d="M70 4l8 8-8 8" className="process-arrow-tip" /></svg>
             </div>
             <div className="process-flow-step">
               <h3 className="process-flow-title">2. Strategy</h3>
@@ -721,7 +847,7 @@ function App() {
               </div>
             </div>
             <div className="process-flow-arrow">
-              <svg className="process-arrow-svg" style={{ animationDelay: '1s' }} width="80" height="24" viewBox="0 0 80 24" fill="none" stroke="#a5b4fc" strokeWidth="2" strokeDasharray="6 6" strokeLinecap="round" strokeLinejoin="round"><path d="M0 12h78M70 4l8 8-8 8"/></svg>
+              <svg className="process-arrow-svg" style={{ animationDelay: '1s' }} width="80" height="24" viewBox="0 0 80 24" fill="none" stroke="#a5b4fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M0 12h78" strokeDasharray="6 6" className="process-arrow-line" /><path d="M70 4l8 8-8 8" className="process-arrow-tip" /></svg>
             </div>
             <div className="process-flow-step">
               <h3 className="process-flow-title">3. Design</h3>
@@ -730,7 +856,7 @@ function App() {
               </div>
             </div>
             <div className="process-flow-arrow">
-              <svg className="process-arrow-svg" style={{ animationDelay: '2s' }} width="80" height="24" viewBox="0 0 80 24" fill="none" stroke="#a5b4fc" strokeWidth="2" strokeDasharray="6 6" strokeLinecap="round" strokeLinejoin="round"><path d="M0 12h78M70 4l8 8-8 8"/></svg>
+              <svg className="process-arrow-svg" style={{ animationDelay: '2s' }} width="80" height="24" viewBox="0 0 80 24" fill="none" stroke="#a5b4fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M0 12h78" strokeDasharray="6 6" className="process-arrow-line" /><path d="M70 4l8 8-8 8" className="process-arrow-tip" /></svg>
             </div>
             <div className="process-flow-step">
               <h3 className="process-flow-title">4. Develop & integrate</h3>
@@ -739,7 +865,7 @@ function App() {
               </div>
             </div>
             <div className="process-flow-arrow">
-              <svg className="process-arrow-svg" style={{ animationDelay: '3s' }} width="80" height="24" viewBox="0 0 80 24" fill="none" stroke="#a5b4fc" strokeWidth="2" strokeDasharray="6 6" strokeLinecap="round" strokeLinejoin="round"><path d="M0 12h78M70 4l8 8-8 8"/></svg>
+              <svg className="process-arrow-svg" style={{ animationDelay: '3s' }} width="80" height="24" viewBox="0 0 80 24" fill="none" stroke="#a5b4fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M0 12h78" strokeDasharray="6 6" className="process-arrow-line" /><path d="M70 4l8 8-8 8" className="process-arrow-tip" /></svg>
             </div>
             <div className="process-flow-step">
               <h3 className="process-flow-title">5. Launch</h3>
@@ -808,18 +934,18 @@ function App() {
         </div>
       </section>
       {/* Products Section (Slide 7) */}
-      <section className="products-slide snap-slide snap-slide-flex">
+      <section id="products" className="products-slide snap-slide snap-slide-flex" data-nav="cuboid" data-slide="7">
         <div className="products-container">
           <div className="products-content">
             <h4 className="products-kicker">Products</h4>
             <h2 className="products-title">WHOOPPE</h2>
             <h3 className="products-subtitle">AI-powered facial recognition ticketing.</h3>
             <p className="products-desc">
-              Seamless, secure entry experiences for<br/>
-              modern events — no tickets, no queues.<br/>
+              Seamless, secure entry experiences for<br />
+              modern events — no tickets, no queues.<br />
               Just your face.
             </p>
-            
+
             <ul className="products-features">
               <li>
                 <div className="feature-check">
@@ -841,38 +967,40 @@ function App() {
               </li>
             </ul>
           </div>
-          
+
           <div className="products-image-wrapper">
-             <img src="/whooppe-mockup.png?v=3" alt="Whooppe App Mockup" className="whooppe-image" />
+            <img src="/whooppe-mockup.png?v=3" alt="Whooppe App Mockup" className="whooppe-image" />
           </div>
+
+          <button className="whooppe-learn-more-btn mobile-only-btn">Learn More About WHOOPPE</button>
         </div>
       </section>
 
       {/* Harika AI Section (Slide 8) */}
-      <section className="harika-slide snap-slide snap-slide-flex">
+      <section id="harika" className="harika-slide snap-slide snap-slide-flex" data-nav="cuboid" data-slide="8">
         <div className="harika-container">
-          
+
           <div className="harika-content">
             <h2 className="harika-title">
               Meet <span className="harika-gradient">HARIKA AI</span>
             </h2>
             <p className="harika-subtitle">
-              A Hospitality Robot That<br/>
+              A Hospitality Robot That<br />
               Remembers Your Customer
             </p>
-            <div className="harika-actions">
+            <div className="harika-actions desktop-only-flex">
               <button className="harika-btn btn-dark">Book Demo</button>
               <button className="harika-btn btn-outline">Learn More</button>
             </div>
           </div>
-          
+
           <div className="harika-illustration">
-            <div className="harika-speech-bubble">
-              <span className="bubble-text-1">"Great restaurants don't just serve food.<br/></span>
+            <div className="harika-speech-bubble desktop-only-bubble">
+              <span className="bubble-text-1">"Great restaurants don't just serve food.<br /></span>
               <span className="bubble-text-2">They remember people."</span>
             </div>
 
-            <img src="/harika-robot.png?v=3" alt="Harika AI Robot" className="harika-robot-img" onError={(e) => { e.currentTarget.style.display='none'; }} />
+            <img src="/harika-robot.png?v=3" alt="Harika AI Robot" className="harika-robot-img" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
 
             {/* Floating Cards */}
             <div className="harika-orbit-container harika-spin">
@@ -883,21 +1011,31 @@ function App() {
             </div>
           </div>
 
+          <div className="harika-actions mobile-only-flex">
+            <button className="harika-btn btn-gradient">Book Demo</button>
+            <button className="harika-btn btn-outline-mobile">Learn More</button>
+          </div>
+
+          <div className="harika-speech-bubble-mobile mobile-only-flex">
+            <span className="bubble-text-1">"Great restaurants don't just serve food.<br /></span>
+            <span className="bubble-text-2">They remember people."</span>
+          </div>
+
         </div>
       </section>
 
 
 
       {/* Slide 9: Remembered */}
-      <section className="snap-slide snap-slide-flex slide9-section">
+      <section className="snap-slide snap-slide-flex slide9-section" data-nav="cuboid" data-slide="9">
         <div className="slide9-container">
           <div className="s9-header">
-            <h2 className="s9-title">Every Customer Should Feel<br/><span className="s9-highlight">Remembered</span></h2>
+            <h2 className="s9-title">Every Customer Should Feel<br /><span className="s9-highlight">Remembered</span></h2>
             <div className="s9-divider">
               <div className="s9-dot"></div>
             </div>
           </div>
-          
+
           <div className="s9-canvas">
             <svg className="s9-lines" viewBox="0 0 1200 550" preserveAspectRatio="xMidYMid meet">
               {/* Top Left Line */}
@@ -920,7 +1058,7 @@ function App() {
             <div className="s9-card s9-card-lt">
               <img src="/s9-face-uploaded.png?v=3" className="s9-feat-img" alt="Recognize Customers Icon" />
               <div className="s9-text">
-                <h3>Recognize<br/>Customers</h3>
+                <h3>Recognize<br />Customers</h3>
                 <p>Identify returning customers instantly through advanced vision systems, ensuring they feel valued from the moment they step in.</p>
               </div>
             </div>
@@ -929,7 +1067,7 @@ function App() {
             <div className="s9-card s9-card-lb">
               <img src="/s9-brain-uploaded.png?v=3" className="s9-feat-img" alt="Remember Preferences Icon" />
               <div className="s9-text">
-                <h3>Remember<br/>Preferences</h3>
+                <h3>Remember<br />Preferences</h3>
                 <p>Use previous feedback and customer preferences to create tailored interactions and memorable dining experiences.</p>
               </div>
             </div>
@@ -944,7 +1082,7 @@ function App() {
             <div className="s9-card s9-card-rt">
               <img src="/s9-cloche-uploaded.png?v=3" className="s9-feat-img" alt="Personalized Dining Experience Icon" />
               <div className="s9-text">
-                <h3>Personalized Dining<br/>Experience</h3>
+                <h3>Personalized Dining<br />Experience</h3>
                 <p>Deliver better interactions on every visit based on customer feedback and past experiences.</p>
               </div>
             </div>
@@ -961,7 +1099,7 @@ function App() {
         </div>
       </section>
       {/* Slide 10: Tech Stack */}
-      <section className="snap-slide snap-slide-flex slide10-section">
+      <section id="features" className="snap-slide snap-slide-flex slide10-section" data-nav="features">
         <div className="slide10-container">
           <div className="s10-left">
             <h2 className="s10-title">
@@ -974,7 +1112,7 @@ function App() {
               We use best-in-class tools and technologies so you get reliable systems, real-time insights, and smarter decisions at scale.
             </p>
 
-            <div className="s10-features-box">
+            <div className="s10-features-box desktop-only-flex">
               <div className="s10-f-item">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                 <span>Secure</span>
@@ -997,97 +1135,117 @@ function App() {
           <div className="s10-right">
             <div className="s10-network">
               <div className="s10-solar-system">
-              <svg className="s10-svg-lines" viewBox="0 0 600 600">
-                <circle cx="300" cy="300" r="140" fill="none" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
-                <circle cx="300" cy="300" r="260" fill="none" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
-                
-                <line x1="300" y1="300" x2="300" y2="40" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
-                <line x1="300" y1="300" x2="484" y2="116" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
-                <line x1="300" y1="300" x2="560" y2="300" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
-                <line x1="300" y1="300" x2="484" y2="484" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
-                <line x1="300" y1="300" x2="300" y2="560" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
-                <line x1="300" y1="300" x2="116" y2="484" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
-                <line x1="300" y1="300" x2="40" y2="300" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
-                <line x1="300" y1="300" x2="116" y2="116" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
-              </svg>
+                <svg className="s10-svg-lines" viewBox="0 0 600 600">
+                  <circle cx="300" cy="300" r="140" fill="none" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
+                  <circle cx="300" cy="300" r="260" fill="none" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
 
-              <div className="s10-node center-node">
-                <div className="s10-node-icon">
-                  <img src="/tech-rocket.png?v=3" alt="Your Startup" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                  <line x1="300" y1="300" x2="300" y2="40" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
+                  <line x1="300" y1="300" x2="484" y2="116" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
+                  <line x1="300" y1="300" x2="560" y2="300" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
+                  <line x1="300" y1="300" x2="484" y2="484" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
+                  <line x1="300" y1="300" x2="300" y2="560" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
+                  <line x1="300" y1="300" x2="116" y2="484" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
+                  <line x1="300" y1="300" x2="40" y2="300" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
+                  <line x1="300" y1="300" x2="116" y2="116" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 6" />
+                </svg>
+
+                <div className="s10-node center-node">
+                  <div className="s10-node-icon">
+                    <img src="/tech-rocket.png?v=3" alt="Your Startup" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                  </div>
+                  <span>Your Startup</span>
                 </div>
-                <span>Your Startup</span>
-              </div>
 
-              <div className="s10-node outer-node" style={{ top: '40px', left: '300px' }}>
-                <div className="s10-n-icon"><img src="/tech-openai.png?v=4" alt="OpenAI" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
-                <span>OpenAI</span>
-              </div>
-              <div className="s10-node outer-node" style={{ top: '116px', left: '484px' }}>
-                <div className="s10-n-icon"><img src="/tech-react.png?v=4" alt="React" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
-                <span>React</span>
-              </div>
-              <div className="s10-node outer-node" style={{ top: '300px', left: '560px' }}>
-                <div className="s10-n-icon"><img src="/tech-github.png?v=4" alt="GitHub" style={{ width: '75px', height: '30px', objectFit: 'contain' }} /></div>
-                <span>GitHub</span>
-              </div>
-              <div className="s10-node outer-node" style={{ top: '484px', left: '484px' }}>
-                <div className="s10-n-icon"><img src="/tech-tailwind.png?v=4" alt="Tailwind CSS" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
-                <span>Tailwind CSS</span>
-              </div>
-              <div className="s10-node outer-node" style={{ top: '560px', left: '300px' }}>
-                <div className="s10-n-icon"><img src="/tech-notion.png?v=4" alt="Notion" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
-                <span>Notion</span>
-              </div>
-              <div className="s10-node outer-node" style={{ top: '484px', left: '116px' }}>
-                <div className="s10-n-icon"><img src="/tech-nodejs2.png?v=5" alt="Node.js" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
-                
-                <span>Node.js</span>
-              </div>
-              <div className="s10-node outer-node" style={{ top: '300px', left: '40px' }}>
-                <div className="s10-n-icon"><img src="/tech-jira.png?v=5" alt="Jira" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
-                <span>Jira</span>
-              </div>
-              <div className="s10-node outer-node" style={{ top: '116px', left: '116px' }}>
-                <div className="s10-n-icon"><img src="/tech-aws.png?v=5" alt="AWS" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
-                <span>AWS</span>
-              </div>
+                <div className="s10-node outer-node" style={{ top: '40px', left: '300px' }}>
+                  <div className="s10-n-icon"><img src="/tech-openai.png?v=4" alt="OpenAI" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
+                  <span>OpenAI</span>
+                </div>
+                <div className="s10-node outer-node" style={{ top: '116px', left: '484px' }}>
+                  <div className="s10-n-icon"><img src="/tech-react.png?v=4" alt="React" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
+                  <span>React</span>
+                </div>
+                <div className="s10-node outer-node" style={{ top: '300px', left: '560px' }}>
+                  <div className="s10-n-icon"><img src="/tech-github.png?v=4" alt="GitHub" style={{ width: '75px', height: '30px', objectFit: 'contain' }} /></div>
+                  <span>GitHub</span>
+                </div>
+                <div className="s10-node outer-node" style={{ top: '484px', left: '484px' }}>
+                  <div className="s10-n-icon"><img src="/tech-tailwind.png?v=4" alt="Tailwind CSS" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
+                  <span>Tailwind CSS</span>
+                </div>
+                <div className="s10-node outer-node" style={{ top: '560px', left: '300px' }}>
+                  <div className="s10-n-icon"><img src="/tech-notion.png?v=4" alt="Notion" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
+                  <span>Notion</span>
+                </div>
+                <div className="s10-node outer-node" style={{ top: '484px', left: '116px' }}>
+                  <div className="s10-n-icon"><img src="/tech-nodejs2.png?v=5" alt="Node.js" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
 
-              <div className="s10-node inner-node" style={{ top: '116px', left: '376px' }}>
-                <div className="s10-n-icon"><img src="/tech-metabase.png?v=3" alt="Metabase" style={{ width: '75px', height: '30px', objectFit: 'contain' }} /></div>
-                <span>Metabase</span>
-              </div>
-              <div className="s10-node inner-node" style={{ top: '224px', left: '484px' }}>
-                <div className="s10-n-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg></div>
-                <span>Payments</span>
-              </div>
-              <div className="s10-node inner-node" style={{ top: '376px', left: '484px' }}>
-                <div className="s10-n-icon"><img src="/tech-slack.png?v=3" alt="Slack" style={{ width: '75px', height: '30px', objectFit: 'contain' }} /></div>
-                <span>Slack</span>
-              </div>
-              <div className="s10-node inner-node" style={{ top: '484px', left: '376px' }}>
-                <div className="s10-n-icon"><img src="/tech-figma.png?v=3" alt="Figma" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
-                <span>Figma</span>
-              </div>
-              <div className="s10-node inner-node" style={{ top: '484px', left: '224px' }}>
-                <div className="s10-n-icon"><img src="/tech-docker.png?v=3" alt="Docker" style={{ width: '80px', height: '30px', objectFit: 'contain' }} /></div>
-                <span>Docker</span>
-              </div>
-              <div className="s10-node inner-node" style={{ top: '376px', left: '116px' }}>
-                <div className="s10-n-icon"><img src="/tech-postgresql.png?v=3" alt="PostgreSQL" style={{ width: '75px', height: '30px', objectFit: 'contain' }} /></div>
-                <span>PostgreSQL</span>
-              </div>
-              <div className="s10-node inner-node" style={{ top: '224px', left: '116px' }}>
-                <div className="s10-n-icon"><img src="/tech-mongodb.png?v=3" alt="MongoDB" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
-                <span>MongoDB</span>
-              </div>
+                  <span>Node.js</span>
+                </div>
+                <div className="s10-node outer-node" style={{ top: '300px', left: '40px' }}>
+                  <div className="s10-n-icon"><img src="/tech-jira.png?v=5" alt="Jira" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
+                  <span>Jira</span>
+                </div>
+                <div className="s10-node outer-node" style={{ top: '116px', left: '116px' }}>
+                  <div className="s10-n-icon"><img src="/tech-aws.png?v=5" alt="AWS" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
+                  <span>AWS</span>
+                </div>
+
+                <div className="s10-node inner-node" style={{ top: '116px', left: '376px' }}>
+                  <div className="s10-n-icon"><img src="/tech-metabase.png?v=3" alt="Metabase" style={{ width: '75px', height: '30px', objectFit: 'contain' }} /></div>
+                  <span>Metabase</span>
+                </div>
+                <div className="s10-node inner-node" style={{ top: '224px', left: '484px' }}>
+                  <div className="s10-n-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg></div>
+                  <span>Payments</span>
+                </div>
+                <div className="s10-node inner-node" style={{ top: '376px', left: '484px' }}>
+                  <div className="s10-n-icon"><img src="/tech-slack.png?v=3" alt="Slack" style={{ width: '75px', height: '30px', objectFit: 'contain' }} /></div>
+                  <span>Slack</span>
+                </div>
+                <div className="s10-node inner-node" style={{ top: '484px', left: '376px' }}>
+                  <div className="s10-n-icon"><img src="/tech-figma.png?v=3" alt="Figma" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
+                  <span>Figma</span>
+                </div>
+                <div className="s10-node inner-node" style={{ top: '484px', left: '224px' }}>
+                  <div className="s10-n-icon"><img src="/tech-docker.png?v=3" alt="Docker" style={{ width: '80px', height: '30px', objectFit: 'contain' }} /></div>
+                  <span>Docker</span>
+                </div>
+                <div className="s10-node inner-node" style={{ top: '376px', left: '116px' }}>
+                  <div className="s10-n-icon"><img src="/tech-postgresql.png?v=3" alt="PostgreSQL" style={{ width: '75px', height: '30px', objectFit: 'contain' }} /></div>
+                  <span>PostgreSQL</span>
+                </div>
+                <div className="s10-node inner-node" style={{ top: '224px', left: '116px' }}>
+                  <div className="s10-n-icon"><img src="/tech-mongodb.png?v=3" alt="MongoDB" style={{ width: '30px', height: '30px', objectFit: 'contain' }} /></div>
+                  <span>MongoDB</span>
+                </div>
               </div>
             </div>
           </div>
+
+          <div className="s10-features-box mobile-only-flex">
+            <div className="s10-f-item">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span>Secure</span>
+            </div>
+            <div className="s10-f-item">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 1 0 10 10"></path><path d="m12 12 4.1-4.1"></path><path d="M16 12a4 4 0 1 0-8 0"></path></svg>
+              <span>Scalable</span>
+            </div>
+            <div className="s10-f-item">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>Reliable</span>
+            </div>
+            <div className="s10-f-item">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+              <span>Insightful</span>
+            </div>
+          </div>
+
         </div>
       </section>
 
       {/* --- SLIDE 11: PROCESS TIMELINE --- */}
-      <section className="snap-slide snap-slide-flex slide11-section">
+      <section className="snap-slide snap-slide-flex slide11-section" data-nav="features">
         <div className="s11-header">
           <h3 className="s11-subtitle">Process</h3>
           <h2 className="s11-title">The Journey From</h2>
@@ -1111,7 +1269,7 @@ function App() {
               <h4 className="s11-step-title">Share Your Idea</h4>
               <p className="s11-step-desc">Tell us about your vision in a free discovery call.</p>
             </div>
-            
+
             <div className="s11-step s11-step-up">
               <div className="s11-number">02</div>
               <div className="s11-icon-box">
@@ -1140,17 +1298,17 @@ function App() {
             </div>
           </div>
         </div>
-        
+
         {/* Placeholder for the wavy background grid */}
         <div className="s11-wavy-bg"></div>
       </section>
 
       {/* Slide 12: FAQs */}
-      <section className="s12-section snap-slide">
+      <section id="contact" className="s12-section snap-slide" data-nav="contact">
         <div className="s12-container">
           <div className="s12-left">
             <h5 className="s12-subtitle">FAQS</h5>
-            <h2 className="s12-title">Questions<br/>founders ask us.</h2>
+            <h2 className="s12-title">Questions<br />founders ask us.</h2>
             <p className="s12-desc">
               Still curious? Book a 30-minute call and we'll answer anything specific to your idea.
             </p>
@@ -1163,8 +1321,8 @@ function App() {
               {faqs.map((faq, index) => {
                 const isActive = activeFaq === index;
                 return (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className={`s12-faq-item ${isActive ? 'active' : ''}`}
                     onClick={() => setActiveFaq(isActive ? null : index)}
                   >
@@ -1172,11 +1330,7 @@ function App() {
                       <div className="s12-faq-icon">{faq.icon}</div>
                       <h4 className="s12-faq-question">{faq.question}</h4>
                       <div className="s12-faq-chevron">
-                        {isActive ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                        )}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
                       </div>
                     </div>
                     {isActive && (
