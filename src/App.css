@@ -124,7 +124,7 @@
 }
 
 .nav-cuboid-container {
-  width: 145px;
+  width: 170px;
   height: 24px;
   overflow: hidden;
   display: inline-flex;
@@ -150,7 +150,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -246,20 +246,20 @@
 .nav-products-dropdown {
   position: absolute;
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  background: white;
-  border: 1px solid rgba(100, 116, 139, 0.2);
+  left: 0;
+  transform: translateX(20px) translateY(10px);
+  background: transparent;
+  border: none;
   border-radius: 12px;
-  padding: 0.5rem;
+  padding: 0.5rem 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  gap: 0.5rem;
+  box-shadow: none;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: 140px;
+  min-width: max-content;
   z-index: 1000;
 }
 
@@ -280,36 +280,29 @@
 }
 
 .dropdown-item {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0rem;
   text-decoration: none;
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   border-radius: 8px;
   text-align: center;
   transition: background 0.2s;
   cursor: pointer;
+  color: white;
 }
 
 .dropdown-item:hover {
-  background: #f1f5f9;
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
+  background: rgba(255, 255, 255, 0.1);
+  color: white !important;
+  -webkit-text-fill-color: white !important;
 }
 
 .harika-text {
-  background: linear-gradient(90deg, #ff007f, #9d00ff, #00ffff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
+  color: white;
 }
 
 .whooppe-text {
-  background: linear-gradient(90deg, #8a2be2, #ff00ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
+  color: white;
 }
 
 /* Pause animation and snap to specific item based on active slide */
@@ -2288,16 +2281,16 @@
   }
 
   .ecosystem-graphic {
-    height: 170px;
-    margin-top: -2rem;
+    height: 250px;
+    margin-top: -1rem;
   }
 
   .eco-orbit-container {
-    transform: scale(0.3);
+    transform: scale(0.45);
   }
 
   .eco-node {
-    transform: scale(2);
+    transform: scale(1.4);
   }
 }
 
@@ -3741,6 +3734,7 @@
 @media (max-width: 768px) {
   .slide9-section {
     padding: 2rem 1rem;
+    background: linear-gradient(135deg, #ffffff 0%, #d8e1fa 90%);
   }
 
   .slide9-container {
@@ -3856,7 +3850,7 @@
   }
 
   .s9-quote-pill span {
-    font-size: 0.65rem;
+    font-size: 0.9rem;
   }
 
   .s9-quote-icon {
@@ -4796,20 +4790,27 @@
     display: none !important;
     position: static;
     transform: none;
-    background: transparent;
+    background: none;
     border: none;
     box-shadow: none;
-    padding: 0.5rem 0 0 0.5rem;
-    margin-top: 0.5rem;
+    padding: 0;
+    margin-top: 0;
     width: 100%;
     flex-direction: column;
-    gap: 0.5rem;
-    border-top: 1px solid rgba(0,0,0,0.05);
+    gap: 0;
   }
 
-  .nav-products-wrapper.active .nav-products-dropdown {
-    border-top: 1px solid rgba(255,255,255,0.2);
+  .nav-products-dropdown .dropdown-item {
+    text-align: right;
+    padding: 0.8rem 1.25rem 0.8rem 7rem;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    justify-content: right;
+    display: flex;
+    color: #1e293b;
   }
+
 
   .nav-products-dropdown.mobile-open {
     display: flex !important;
