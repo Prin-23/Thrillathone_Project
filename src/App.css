@@ -9,8 +9,6 @@
 
 /* Slide Snapping Utilities */
 .snap-slide {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
   min-height: 100vh;
   min-height: 100dvh;
 }
@@ -246,16 +244,16 @@
 .nav-products-dropdown {
   position: absolute;
   top: 100%;
-  left: 0;
-  transform: translateX(20px) translateY(10px);
-  background: transparent;
-  border: none;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: white;
+  border: 1px solid rgba(100, 116, 139, 0.2);
   border-radius: 12px;
   padding: 0.5rem 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  box-shadow: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -280,7 +278,7 @@
 }
 
 .dropdown-item {
-  padding: 0.5rem 0rem;
+  padding: 0.5rem 1rem;
   text-decoration: none;
   font-weight: 800;
   font-size: 0.95rem;
@@ -288,21 +286,21 @@
   text-align: center;
   transition: background 0.2s;
   cursor: pointer;
-  color: white;
+  color: #000;
 }
 
 .dropdown-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white !important;
-  -webkit-text-fill-color: white !important;
+  background: rgba(0, 0, 0, 0.05);
+  color: #6366f1 !important;
+  -webkit-text-fill-color: #6366f1 !important;
 }
 
 .harika-text {
-  color: white;
+  color: #000;
 }
 
 .whooppe-text {
-  color: white;
+  color: #000;
 }
 
 /* Pause animation and snap to specific item based on active slide */
@@ -3236,35 +3234,45 @@
 .harika-speech-bubble {
   position: absolute;
   top: 40px;
-  left: -20px;
+  left: -280px;
   background: white;
-  border-radius: 20px;
-  padding: 1rem 1.5rem;
-  font-size: 1rem;
+  border-radius: 30px;
+  padding: 1.25rem 2rem;
+  font-size: 1.1rem;
   box-shadow: 0 10px 25px rgba(168, 85, 247, 0.15);
   transform: translateZ(50px);
   text-align: center;
   z-index: 20;
+  border: 2px solid #e9d5ff;
+}
+
+.harika-speech-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -18px;
+  right: 18px;
+  border-width: 18px 0 0 22px;
+  border-style: solid;
+  border-color: #e9d5ff transparent transparent transparent;
 }
 
 .harika-speech-bubble::after {
   content: '';
   position: absolute;
-  bottom: -15px;
+  bottom: -14px;
   right: 20px;
-  border-width: 15px 0 0 20px;
+  border-width: 15px 0 0 19px;
   border-style: solid;
   border-color: white transparent transparent transparent;
 }
 
-.bubble-text-1 {
-  color: #06b6d4;
-  font-weight: 700;
-}
-
-.bubble-text-2 {
-  color: #a855f7;
-  font-weight: 700;
+.bubble-text-1, .bubble-text-2 {
+  background: linear-gradient(to right, #a855f7, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  font-size: 1.1rem;
 }
 
 /* Harika Cards & Orbit */
@@ -3459,9 +3467,8 @@
 
   .harika-speech-bubble-mobile .bubble-text-1,
   .harika-speech-bubble-mobile .bubble-text-2 {
-    color: #3b82f6;
-    font-weight: 700;
-    font-size: 0.9rem;
+    font-weight: 800;
+    font-size: 1rem;
     line-height: 1.5;
   }
 }

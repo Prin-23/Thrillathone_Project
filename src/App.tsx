@@ -190,7 +190,7 @@ function App() {
             </div>
             <a href="#features" onClick={() => handleNavClick('features')} className={`nav-link ${activeNav === 'features' ? 'active' : ''}`}>Features</a>
             <a href="#contact" onClick={() => handleNavClick('contact')} className={`nav-link ${activeNav === 'contact' ? 'active' : ''}`}>Contact US</a>
-            <a href="#privacy" onClick={() => handleNavClick('privacy')} className={`nav-link ${activeNav === 'privacy' ? 'active' : ''}`}>Privacy Policy</a>
+            <a href="https://thrillathon.co.in/policy.html" target="_blank" rel="noopener noreferrer" className="nav-link">Privacy Policy</a>
           </div>
         </nav>
       </header>
@@ -996,7 +996,7 @@ function App() {
 
           <div className="harika-illustration">
             <div className="harika-speech-bubble desktop-only-bubble">
-              <span className="bubble-text-1">"Great restaurants don't just serve food.<br /></span>
+              <span className="bubble-text-1">"Great restaurants don't just serve food.</span><br />
               <span className="bubble-text-2">They remember people."</span>
             </div>
 
