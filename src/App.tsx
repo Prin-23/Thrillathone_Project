@@ -8,10 +8,16 @@ import s2Icon from './assets/s2.png'
 import s3Icon from './assets/s3.png'
 import s4Icon from './assets/s4.png'
 import s5Icon from './assets/s5.png'
+import { FaWhatsapp, FaInstagram, FaFacebookF, FaXTwitter } from 'react-icons/fa6'
+import PrivacyPolicy from './PrivacyPolicy';
 
 function App() {
+  const initialHash = window.location.hash ? window.location.hash.substring(1) : 'home';
+  const validNavs = ['home', 'about', 'services', 'cuboid', 'features', 'contact', 'policy'];
+  const initialNav = validNavs.includes(initialHash) ? initialHash : 'home';
+  
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
-  const [activeNav, setActiveNav] = useState<string>('home');
+  const [activeNav, setActiveNav] = useState<string>(initialNav);
   const [activeSlide, setActiveSlide] = useState<string>('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isMobileProductsDropdownOpen, setIsMobileProductsDropdownOpen] = useState<boolean>(false);
@@ -19,6 +25,17 @@ function App() {
 
   const handleNavClick = (navTarget: string) => {
     setActiveNav(navTarget);
+    window.history.replaceState(null, '', `#${navTarget}`);
+    
+    if (navTarget === 'policy') {
+      window.scrollTo(0, 0);
+      if (isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+        setIsMobileProductsDropdownOpen(false);
+      }
+      return;
+    }
+
     isScrollingToRef.current = true;
     // Allow smooth scroll to finish before IntersectionObserver takes over again
     setTimeout(() => {
@@ -36,8 +53,13 @@ function App() {
       entries.forEach(entry => {
         if (entry.isIntersecting && !isScrollingToRef.current) {
           const navTarget = entry.target.getAttribute('data-nav');
+          const slideId = entry.target.id;
           if (navTarget) {
             setActiveNav(navTarget);
+          }
+          const hashTarget = slideId || navTarget;
+          if (hashTarget) {
+            window.history.replaceState(null, '', `#${hashTarget}`);
           }
           const slideTarget = entry.target.getAttribute('data-slide');
           setActiveSlide(slideTarget || '');
@@ -166,7 +188,7 @@ function App() {
                   <a href="#products" className="nav-slide-item nav-slide-item-1" style={{ textDecoration: 'none' }}>
                     OUR PRODUCTS
                   </a>
-                  <a href="#products" className="nav-slide-item nav-slide-item-2" style={{ textDecoration: 'none' }}>
+                  <a href="#whooppe" className="nav-slide-item nav-slide-item-2" style={{ textDecoration: 'none' }}>
                     WHOOPPE
                   </a>
                   <a href="#harika" className="nav-slide-item nav-slide-item-3" style={{ textDecoration: 'none' }}>
@@ -185,17 +207,18 @@ function App() {
               </button>
               <div className={`nav-products-dropdown ${isMobileProductsDropdownOpen ? 'mobile-open' : ''}`}>
                 <a href="#harika" onClick={(e) => { e.stopPropagation(); handleNavClick('cuboid'); setIsMobileProductsDropdownOpen(false); }} className="dropdown-item harika-text">HARIKA AI</a>
-                <a href="#products" onClick={(e) => { e.stopPropagation(); handleNavClick('cuboid'); setIsMobileProductsDropdownOpen(false); }} className="dropdown-item whooppe-text">WHOOPPE</a>
+                <a href="#whooppe" onClick={(e) => { e.stopPropagation(); handleNavClick('cuboid'); setIsMobileProductsDropdownOpen(false); }} className="dropdown-item whooppe-text">WHOOPPE</a>
               </div>
             </div>
             <a href="#features" onClick={() => handleNavClick('features')} className={`nav-link ${activeNav === 'features' ? 'active' : ''}`}>Features</a>
             <a href="#contact" onClick={() => handleNavClick('contact')} className={`nav-link ${activeNav === 'contact' ? 'active' : ''}`}>Contact US</a>
-            <a href="https://thrillathon.co.in/policy.html" target="_blank" rel="noopener noreferrer" className="nav-link">Privacy Policy</a>
+            <a href="#policy" onClick={(e) => { e.preventDefault(); handleNavClick('policy'); }} className={`nav-link ${activeNav === 'policy' ? 'active' : ''}`}>Privacy Policy</a>
           </div>
         </nav>
       </header>
 
-      <main id="home" className="hero-section snap-slide" data-nav="home">
+      <div style={{ display: activeNav === 'policy' ? 'none' : 'block' }}>
+        <main id="home" className="hero-section snap-slide" data-nav="home">
         <div className="hero-content">
           <h1 className="hero-title">
             Build Your <span className="gradient-text-pink">Startup.</span><br />
@@ -934,7 +957,7 @@ function App() {
         </div>
       </section>
       {/* Products Section (Slide 7) */}
-      <section id="products" className="products-slide snap-slide snap-slide-flex" data-nav="cuboid" data-slide="7">
+      <section id="whooppe" className="products-slide snap-slide snap-slide-flex" data-nav="cuboid" data-slide="7">
         <div className="products-container">
           <div className="products-content">
             <h4 className="products-kicker">Products</h4>
@@ -996,7 +1019,7 @@ function App() {
 
           <div className="harika-illustration">
             <div className="harika-speech-bubble desktop-only-bubble">
-              <span className="bubble-text-1">"Great restaurants don't just serve food.</span><br />
+              <span className="bubble-text-1">"Great restaurants don't just serve food.</span>
               <span className="bubble-text-2">They remember people."</span>
             </div>
 
@@ -1027,7 +1050,7 @@ function App() {
 
 
       {/* Slide 9: Remembered */}
-      <section className="snap-slide snap-slide-flex slide9-section" data-nav="cuboid" data-slide="9">
+      <section id="products" className="snap-slide snap-slide-flex slide9-section" data-nav="cuboid" data-slide="9">
         <div className="slide9-container">
           <div className="s9-header">
             <h2 className="s9-title">Every Customer Should Feel<br /><span className="s9-highlight">Remembered</span></h2>
@@ -1089,12 +1112,10 @@ function App() {
           </div>
 
           <div className="s9-quote-pill">
-            <div className="s9-quote-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                <path d="M14.017 21L16.411 14.288L14.017 14.288L14.017 3.00001L23.992 3.00001L23.992 14.288L18.828 21L14.017 21z M0.00799981 21L2.402 14.288L0.00799981 14.288L0.00799981 3.00001L9.983 3.00001L9.983 14.288L4.819 21L0.00799981 21z"></path>
-              </svg>
-            </div>
-            <span>"One Feedback Can Change The Next Experience"</span>
+            <span className="s9-quote-text">
+              “Not Every Customer Returns. But Every Customer<br />
+              Should Feel Remembered.”
+            </span>
           </div>
         </div>
       </section>
@@ -1345,6 +1366,46 @@ function App() {
           </div>
         </div>
       </section>
+      </div>
+
+      {activeNav === 'policy' && <PrivacyPolicy />}
+
+      {/* Main Footer */}
+      <footer className="main-footer">
+        <div className="footer-container">
+          <div className="footer-top">
+            <div className="footer-brand">
+              <img src={logoUrl} alt="Thrillathon Logo" className="footer-logo-img" />
+              <p className="footer-description">
+                Revolutionizing access control with cutting-edge<br />
+                security and intelligent technologies.
+              </p>
+            </div>
+          </div>
+          
+          <div className="footer-divider"></div>
+          
+          <div className="footer-bottom">
+            <div className="footer-copyright">
+              © 2026 Thrillathon Innovation Private Limited. All rights reserved.
+            </div>
+            <div className="footer-socials">
+              <a href="#" aria-label="WhatsApp" className="social-icon whatsapp">
+                <FaWhatsapp size={24} color="white" />
+              </a>
+              <a href="#" aria-label="Instagram" className="social-icon instagram">
+                <FaInstagram size={24} color="white" />
+              </a>
+              <a href="#" aria-label="Facebook" className="social-icon facebook">
+                <FaFacebookF size={22} color="white" />
+              </a>
+              <a href="#" aria-label="X" className="social-icon x-twitter">
+                <FaXTwitter size={22} color="black" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
