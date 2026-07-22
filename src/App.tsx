@@ -10,10 +10,11 @@ import s4Icon from './assets/s4.png'
 import s5Icon from './assets/s5.png'
 import { FaWhatsapp, FaInstagram, FaFacebookF, FaXTwitter } from 'react-icons/fa6'
 import PrivacyPolicy from './PrivacyPolicy';
+import TermsAndConditions from './TermsAndConditions';
 
 function App() {
   const initialHash = window.location.hash ? window.location.hash.substring(1) : 'home';
-  const validNavs = ['home', 'about', 'services', 'cuboid', 'features', 'contact', 'policy'];
+  const validNavs = ['home', 'about', 'services', 'cuboid', 'features', 'contact', 'policy', 'terms'];
   const initialNav = validNavs.includes(initialHash) ? initialHash : 'home';
   
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
@@ -27,7 +28,7 @@ function App() {
     setActiveNav(navTarget);
     window.history.replaceState(null, '', `#${navTarget}`);
     
-    if (navTarget === 'policy') {
+    if (navTarget === 'policy' || navTarget === 'terms') {
       window.scrollTo(0, 0);
       if (isMobileMenuOpen) {
         setIsMobileMenuOpen(false);
@@ -37,6 +38,15 @@ function App() {
     }
 
     isScrollingToRef.current = true;
+    
+    // Ensure smooth scroll happens after React renders the unhidden main content
+    setTimeout(() => {
+      const targetElement = document.getElementById(navTarget);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 50);
+
     // Allow smooth scroll to finish before IntersectionObserver takes over again
     setTimeout(() => {
       isScrollingToRef.current = false;
@@ -217,7 +227,7 @@ function App() {
         </nav>
       </header>
 
-      <div style={{ display: activeNav === 'policy' ? 'none' : 'block' }}>
+      <div style={{ display: (activeNav === 'policy' || activeNav === 'terms') ? 'none' : 'block' }}>
         <main id="home" className="hero-section snap-slide" data-nav="home">
         <div className="hero-content">
           <h1 className="hero-title">
@@ -1369,6 +1379,8 @@ function App() {
       </div>
 
       {activeNav === 'policy' && <PrivacyPolicy />}
+      {activeNav === 'terms' && <TermsAndConditions />}
+
 
       {/* Main Footer */}
       <footer className="main-footer">
@@ -1377,9 +1389,51 @@ function App() {
             <div className="footer-brand">
               <img src={logoUrl} alt="Thrillathon Logo" className="footer-logo-img" />
               <p className="footer-description">
-                Revolutionizing access control with cutting-edge<br />
-                security and intelligent technologies.
+                Building complete startup ecosystems — from idea<br />
+                validation to market launch. Your vision, our execution.
               </p>
+            </div>
+            
+            <div className="footer-links-grid">
+              <div className="footer-links-row">
+                <div className="footer-link-group">
+                  <h4 className="footer-heading">Our Products</h4>
+                  <ul className="footer-list">
+                    <li>Harika AI</li>
+                    <li>WHOOPPE</li>
+                  </ul>
+                  <div className="footer-group-divider"></div>
+                </div>
+                <div className="footer-link-group">
+                  <h4 className="footer-heading">Legal</h4>
+                  <ul className="footer-list">
+                    <li><a href="#policy" onClick={(e) => { e.preventDefault(); handleNavClick('policy'); }}>Privacy Policy</a></li>
+                    <li><a href="#terms" onClick={(e) => { e.preventDefault(); handleNavClick('terms'); }}>Terms &amp; Conditions</a></li>
+                  </ul>
+                  <div className="footer-group-divider"></div>
+                </div>
+              </div>
+              
+              <div className="footer-links-row">
+                <div className="footer-link-group">
+                  <h4 className="footer-heading">Contact</h4>
+                  <ul className="footer-list contact-list">
+                    <li><span className="footer-icon">✉️</span> <a href="mailto:Contact@Thrillathon.Co.In">Contact@Thrillathon.Co.In</a></li>
+                    <li><span className="footer-icon">📞</span> <a href="tel:+918824223395">+91-8824223395</a></li>
+                    <li className="address-li"><span className="footer-icon">📍</span> <span>Nand Bhawan, Mahaveer Nagar 3,<br/>Kota, Rajasthan – 324005</span></li>
+                  </ul>
+                </div>
+                <div className="footer-link-group quick-links">
+                  <h4 className="footer-heading">Quick Links</h4>
+                  <ul className="footer-list">
+                    <li><a href="#home" onClick={(e) => { e.preventDefault(); handleNavClick('home'); }}>Home</a></li>
+                    <li><a href="#about" onClick={(e) => { e.preventDefault(); handleNavClick('about'); }}>About</a></li>
+                    <li><a href="#services" onClick={(e) => { e.preventDefault(); handleNavClick('services'); }}>Services</a></li>
+                    <li><a href="#features" onClick={(e) => { e.preventDefault(); handleNavClick('features'); }}>Features</a></li>
+                    <li><a href="#contact" onClick={(e) => { e.preventDefault(); handleNavClick('contact'); }}>Contact Us</a></li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
           

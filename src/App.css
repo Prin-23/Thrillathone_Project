@@ -50,7 +50,7 @@
   align-items: center;
   position: relative;
   padding: 0.25rem 2rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: #ffffff;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(100, 116, 139, 0.2);
@@ -4526,6 +4526,8 @@
 .s12-left {
   flex: 1;
   max-width: 400px;
+  display: flex;
+  flex-direction: column;
 }
 
 .s12-subtitle {
@@ -4556,10 +4558,12 @@
   border-radius: 1rem;
   overflow: hidden;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  height: 400px;
 }
 
 .s12-image {
   width: 100%;
+  height: 100%;
   display: block;
   object-fit: cover;
 }
@@ -4838,20 +4842,119 @@
 
 .footer-top {
   margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
 }
 
 .footer-brand {
-  max-width: 500px;
+  max-width: 450px;
+}
+
+.footer-links-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  flex: 1;
+  max-width: 650px;
+}
+
+.footer-links-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.footer-link-group {
+  flex: 1;
+}
+
+.footer-heading {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #000;
+}
+
+.footer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-list li {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.footer-list li a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s;
+}
+
+.footer-list li a:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+.footer-group-divider {
+  width: 100%;
+  height: 1px;
+  background-color: #ddd;
+  margin-top: 1.5rem;
+}
+
+.contact-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.contact-list .address-li {
+  align-items: flex-start;
+}
+
+.footer-icon {
+  font-size: 1.1rem;
+}
+
+@media (max-width: 900px) {
+  .footer-top {
+    flex-direction: column;
+  }
+  .footer-links-grid {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-links-row {
+    flex-direction: column;
+  }
+  .footer-logo-img {
+    height: 50px!important;
+    margin-bottom: 1.5rem;
+  }
+  .footer-description {
+    font-size: 0.85rem!important;
+    text-align: center!important;
+    max-width: 100%!important;
+  }
 }
 
 .footer-logo-img {
-  height: 45px;
+  margin-top: -30%;
+  height: 70px;
   width: auto;
-  margin-bottom: 1rem;
+  margin-bottom: 2.5rem;
 }
 
 .footer-description {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #111;
   line-height: 1.5;
 }
